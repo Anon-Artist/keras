@@ -22,6 +22,14 @@ import sys
 import io
 import builtins
 
+safe_builtins = {
+    'range',
+    'complex',
+    'set',
+    'frozenset',
+    'slice',
+}
+
 from six.moves import cPickle
 
 class RestrictedUnpickler(pickle.Unpickler):
