@@ -19,9 +19,24 @@ from __future__ import division
 from __future__ import print_function
 
 import sys
+import io
+import builtins
 
 from six.moves import cPickle
 
+class RestrictedUnpickler(pickle.Unpickler):
+
+    def find_class(self, module, name):
+        """Only allow safe classes from builtins"""
+        if module == "builtins" and name in safe_builtins:
+            return getattr(builtins, name)
+        """Forbid everything else"""
+        raise pickle.UnpicklingError("global '%s.%s' is forbidden" %
+                                     (module, name))
+
+def restricted_loads(s):
+    """Helper function analogous to pickle.loads()"""
+    return RestrictedUnpickler(io.BytesIO(s)).load()
 
 def load_batch(fpath, label_key='labels'):
   """Internal utility for parsing CIFAR data.
@@ -35,6 +50,7 @@ def load_batch(fpath, label_key='labels'):
       A tuple `(data, labels)`.
   """
   with open(fpath, 'rb') as f:
+    restricted_loads(f.read())
     if sys.version_info < (3,):
       d = cPickle.load(f)
     else:
