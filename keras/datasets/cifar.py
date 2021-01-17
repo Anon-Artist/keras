@@ -21,6 +21,7 @@ from __future__ import print_function
 import sys
 import io
 import builtins
+import pickle
 
 safe_builtins = {
     'range',
